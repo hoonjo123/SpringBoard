@@ -1,6 +1,5 @@
 package com.spring.board.author.Controller;
 
-import com.spring.board.author.dto.AuthorDetailResDto;
 import com.spring.board.author.dto.AuthorListResDto;
 import com.spring.board.author.dto.AuthorSaveReqDto;
 import com.spring.board.author.service.AuthorService;
@@ -40,11 +39,13 @@ public class AuthorController {
 
     @GetMapping("/author/detail/{id}")
     public String authorDetail(@PathVariable Long id, Model model){
-        AuthorDetailResDto authorDetailResDto = authorService.findById(id);
-        model.addAttribute("authorDetail", authorDetailResDto);
+        System.out.println(id);
+        model.addAttribute("author", authorService.findById(id));
         return "author/author-detail";
     }
 
-
-
+    @GetMapping("/author/save")
+    public String authorCreate(){
+        return "author/author-save";
+    }
 }
