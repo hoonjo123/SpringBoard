@@ -11,5 +11,6 @@ import java.time.LocalDateTime;
         private String title;
         private String contents;
         private LocalDateTime createdTime;
+        private String authorEmail;
     }
 

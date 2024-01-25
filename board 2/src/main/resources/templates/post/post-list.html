@@ -70,6 +70,7 @@
         <tr>
             <th>id</th>
             <th>title</th>
+            <th>email</th>
             <th>#</th>
         </tr>
         </thead>
@@ -77,6 +78,7 @@
         <tr th:each="post : ${postList}">
             <td th:text="${post.id}"></td>
             <td th:text="${post.title}"></td>
+            <td th:text="${post.authorEmail}"></td>
             <td><a th:href="@{|/post/detail/${post.id}|}" class="btn btn-info">상세보기</a></td>
         </tr>
         </tbody>
@@ -84,3 +86,4 @@
 </div>
 </body>
 </html>
+

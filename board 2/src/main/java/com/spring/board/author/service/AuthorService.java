@@ -7,97 +7,107 @@ import com.spring.board.author.dto.AuthorListResDto;
 import com.spring.board.author.dto.AuthorSaveReqDto;
 import com.spring.board.author.dto.AuthorUpdateReqDto;
 import com.spring.board.author.repository.AuthorRepository;
+import com.spring.board.post.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AuthorService {
     private final AuthorRepository authorRepository;
-
-    @Autowired //생성자가 하나일때는 Autowired 생략가능하나.. 그냥 붙인다.
-    public AuthorService(AuthorRepository authorRepository) {
+    private final PostRepository postRepository;
+    @Autowired
+    public AuthorService(AuthorRepository authorRepository, PostRepository postRepository) {
         this.authorRepository = authorRepository;
+        this.postRepository = postRepository;
     }
 
     public void save(AuthorSaveReqDto authorSaveReqDto) {
         Role role = null;
-        if (authorSaveReqDto.getRole() == null || authorSaveReqDto.getRole().equals("user")) {
+        if(authorSaveReqDto.getRole() == null || authorSaveReqDto.getRole().equals("user")){
             role = Role.USER;
-        } else {
+        }else{
             role = Role.ADMIN;
         }
         //일반 생성자 방식
-//        Author author = new Author(
-//                authorSaveReqDto.getName(),
-//                authorSaveReqDto.getEmail(),
-//                authorSaveReqDto.getPassword(),
-//                role);
+        //Author author = new Author(authorSaveReqDto.getName(), authorSaveReqDto.getEmail(), authorSaveReqDto.getPassword(), role);
+
+
         //빌더패턴
+        // .build() : 최종적으로 완성시키는 단계
         Author author = Author.builder()
                 .email(authorSaveReqDto.getEmail())
                 .name(authorSaveReqDto.getName())
                 .password(authorSaveReqDto.getPassword())
                 .build();
-        authorRepository.save(author);
 
+//        //cascade.persist 테스트
+//        //부모 테이블을 통해 자식 테이블에 객체를 동시에 생성
+//        List<Post> posts = new ArrayList<>();
+//        Post post = new Post.builder()
+//                .title("안녕하세요. " + author.getName() + "입니다.")
+//                .contents("반갑습니다. cascade 테스트 중입니다..")
+//                .author(author)
+//                .build();
+//        posts.add(post);
+        //author.setPosts(posts); // setter를 사용하지 않기 위해 Post 생성자에 this.author.getPosts(this);
+
+        authorRepository.save(author);
     }
 
     public List<AuthorListResDto> findAll() {
         List<Author> Authors = authorRepository.findAll();
         List<AuthorListResDto> AuthorListResDtos = new ArrayList<>();
-        for (Author author : Authors) {
-            AuthorListResDto authorListResDtos = new AuthorListResDto();
-            authorListResDtos.setId(author.getId());
-            authorListResDtos.setName(author.getName());
-            authorListResDtos.setEmail(author.getEmail());
-            AuthorListResDtos.add(authorListResDtos);
+        for(Author author : Authors){
+            AuthorListResDto authorListResDto = new AuthorListResDto();
+            authorListResDto.setId(author.getId());
+            authorListResDto.setName(author.getName());
+            authorListResDto.setEmail(author.getEmail());
+            AuthorListResDtos.add(authorListResDto);
         }
         return AuthorListResDtos;
+//        return authorRepository.findAll().stream().map(author -> new AuthorListResDto(author.getId(), author.getName(), author.getEmail())).toList();
     }
 
-    public AuthorDetailResDto findById(Long id) throws EntityNotFoundException {
-        Author author = authorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    public Author findById(Long id) throws EntityNotFoundException {
+        Author author = authorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("검색하신 ID의 Member가 없습니다."));
+        return author;
+    }
+
+    public AuthorDetailResDto findAuthorDetail(Long id) throws EntityNotFoundException {
+        Author author = this.findById(id);
         String role = null;
-        if (author.getRole() == null || author.getRole().equals(Role.USER)) {
+        if(author.getRole() == null || author.getRole().equals(Role.USER)){
             role = "일반유저";
-        } else {
+        }else{
             role = "관리자";
         }
-
         AuthorDetailResDto authorDetailResDto = new AuthorDetailResDto();
         authorDetailResDto.setId(author.getId());
         authorDetailResDto.setName(author.getName());
         authorDetailResDto.setEmail(author.getEmail());
         authorDetailResDto.setPassword(author.getPassword());
         authorDetailResDto.setRole(role);
+        authorDetailResDto.setCounts(author.getPosts().size());
         authorDetailResDto.setCreatedTime(author.getCreatedTime());
         return authorDetailResDto;
-
     }
 
-    // ... 기존 코드 ...
-
-    public void update(AuthorUpdateReqDto authorUpdateReqDto) {
-        Author author = authorRepository.findById(authorUpdateReqDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Author not found with id: " + authorUpdateReqDto.getId()));
-
-        author.setName(authorUpdateReqDto.getName());
-        author.setPassword(authorUpdateReqDto.getPassword());
-        // 기타 필요한 필드 업데이트
-        authorRepository.save(author);
+    public void update(Long id, AuthorUpdateReqDto authorUpdateReqDto) throws EntityNotFoundException {
+        Author author = this.findById(id);
+        author.updateAuthor(authorUpdateReqDto.getName(), authorUpdateReqDto.getPassword());
+        //명시적으로 save를 하지 않더라도, JPA의 영속성 컨텍스트를 통해
+        //객체에 변경이 감지(dirty checking)되면, 트랜잭션이 완료되는 시점에 save 동작
+        //authorRepository.save(author);
     }
 
-
-    public void delete(Long id) {
-        Optional<Author> authorOptional = authorRepository.findById(id);
-        if (authorOptional.isPresent()) {
-            Author author = authorOptional.get();
-            authorRepository.delete(author);
-        }
+    public void delete(Long id) throws EntityNotFoundException {
+        Author author = this.findById(id);
+        authorRepository.delete(author);
+//        authorRepository.deleteById(id);
     }
+
 }

@@ -1,67 +1,67 @@
 package com.spring.board.author.domain;
 
+import com.spring.board.post.domain.Post;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Getter
 @Entity
-
-@NoArgsConstructor//jpa에서 데이터를 조립할 때 기본생성자를 만들어 기본생성자에 setter가 없다하더라도 reflection 기술을 이용해서 .. 뭐라고?
+@NoArgsConstructor
 @Builder
+// Builder 어노테이션을 통해 빌더 패턴으로 객체 생성
+// 매개변수의 순서, 개수 등을 유연하게 세팅
 @AllArgsConstructor
-//Builder어노테이션을 통해 빌터페턴으로 객체생성
-//매개변수의 세팅순서, 매개변수의 개수등을 유연하게 세팅할 수 있다.
-//위와같이 모든 매개변수가 있는 생성자를 생성하는 어노테이션과 Builder를 클래스에 붙여
-//모든 매개변수가 있는 생성자 위에 Builder어노테이션을 붙인것과 같은 효과가 있음.
+//위와 같이 모든 매개변수가 있는 생성자를 생성하는 어노테이션과 Builder를 클래스에 붙여
+//모든 매개변수가 있는 생성자 위에 Builder 어노테이션과 붙인 것과 같은 효과가 있음.
 public class Author {
-
-    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter
     @Column(nullable = false, length = 20)
     private String name;
 
-    @Setter
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(nullable = false, length = 20, unique = true)
     private String email;
 
-    @Setter
     @Column(nullable = false)
     private String password;
-
-    @CreationTimestamp
-    @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdTime;
-
-    @UpdateTimestamp
-    @Column(columnDefinition = "TIMESTAMP ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime updatedTime;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    //author를 조회할 때 post 객체가 필요할 시에 선언
+    //mappedBy를 연관관계의 주인을 명시하고, FK를 관리하는 변수명을 명시
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch=FetchType.LAZY) //Post 객체에 있는 변수명을 적어 매핑관계 표현
+    private List<Post> posts; // posts 리스트에 post가 생성될 때마다 Post 테이블 가서 생성해줌
+    //AuthorRepository.save만 해줘도 자동으로 PostRepository.save까지 해줌
 
+    @CreationTimestamp
+    // 개발자가 DB를 바꾸는 게 risky한 것. 프로그램적으로 다루는 것이 좋다.
+    @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    LocalDateTime createdTime;
 
+    @UpdateTimestamp
+    @Column(columnDefinition = "TIMESTAMP ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    LocalDateTime updatedTime;
 
-    public Author(String name, String email, String password, Role role) {
+// @Builder // 클래스 단에 붙여주지 않으면 메서드 단에서 설정 가능
+//    public Author(String name, String email, String password, Role role, List<Post> posts) {
+//        this.name = name;
+//        this.email = email;
+//        this.password = password;
+//        this.role = role;
+//        this.posts = posts;
+//    }
+
+    public void updateAuthor(String name, String password){
         this.name = name;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-
-    }
-    public void updateMember(String name, String password) {
-        this.name = name;
         this.password = password;
     }
-
-
 }

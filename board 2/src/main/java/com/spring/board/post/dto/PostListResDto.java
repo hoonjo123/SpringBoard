@@ -4,8 +4,9 @@ import lombok.Data;
 
 
     @Data
-    public class PostListResDto{
+    public class PostListResDto {
         private Long id;
         private String title;
+        private String authorEmail;
 
 }
