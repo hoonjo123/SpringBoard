@@ -9,7 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 @Controller
@@ -26,10 +26,17 @@ public class AuthorController {
     }
 
     @PostMapping("author/create")
-    public String authorSave(AuthorSaveReqDto authorSaveReqDto){
-        authorService.save(authorSaveReqDto);
-        return "redirect:/author/list";
+    public String authorSave(AuthorSaveReqDto authorSaveReqDto, RedirectAttributes redirectAttributes){
+        try {
+            authorService.save(authorSaveReqDto);
+            return "redirect:/author/list";
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/author/create"; // 오류 시 양식 페이지로 리디렉션
+        }
     }
+
+
 
     @GetMapping("author/list")
     public String authorList(Model model) {

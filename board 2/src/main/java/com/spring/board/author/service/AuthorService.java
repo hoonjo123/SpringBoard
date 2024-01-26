@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AuthorService {
@@ -25,38 +26,33 @@ public class AuthorService {
         this.postRepository = postRepository;
     }
 
-    public void save(AuthorSaveReqDto authorSaveReqDto) {
-        Role role = null;
+    public void save(AuthorSaveReqDto authorSaveReqDto) throws IllegalArgumentException, IllegalAccessException {
+        // 이메일로 기존 저자 조회
+        Optional<Author> existingAuthor = authorRepository.findByEmail(authorSaveReqDto.getEmail());
+        if(existingAuthor.isPresent()) {
+            throw new IllegalAccessException("중복이메일입니다.");
+        }
+
+        // Role 설정
+        Role role;
         if(authorSaveReqDto.getRole() == null || authorSaveReqDto.getRole().equals("user")){
             role = Role.USER;
-        }else{
+        } else {
             role = Role.ADMIN;
         }
-        //일반 생성자 방식
-        //Author author = new Author(authorSaveReqDto.getName(), authorSaveReqDto.getEmail(), authorSaveReqDto.getPassword(), role);
 
-
-        //빌더패턴
-        // .build() : 최종적으로 완성시키는 단계
-        Author author = Author.builder()
+        // 빌더 패턴을 사용한 Author 객체 생성
+        Author newAuthor = Author.builder()
                 .email(authorSaveReqDto.getEmail())
                 .name(authorSaveReqDto.getName())
                 .password(authorSaveReqDto.getPassword())
+                .role(role) // role을 설정
                 .build();
 
-//        //cascade.persist 테스트
-//        //부모 테이블을 통해 자식 테이블에 객체를 동시에 생성
-//        List<Post> posts = new ArrayList<>();
-//        Post post = new Post.builder()
-//                .title("안녕하세요. " + author.getName() + "입니다.")
-//                .contents("반갑습니다. cascade 테스트 중입니다..")
-//                .author(author)
-//                .build();
-//        posts.add(post);
-        //author.setPosts(posts); // setter를 사용하지 않기 위해 Post 생성자에 this.author.getPosts(this);
-
-        authorRepository.save(author);
+        // Author 객체 저장
+        authorRepository.save(newAuthor);
     }
+
 
     public List<AuthorListResDto> findAll() {
         List<Author> Authors = authorRepository.findAll();

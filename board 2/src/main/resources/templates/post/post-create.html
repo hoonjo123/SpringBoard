@@ -31,6 +31,15 @@
         <div class="form-group">
             <button type="submit" class="btn btn-primary mt-3">등록하기</button>
         </div>
+        <input type="hidden" id="error" th:value="${error}">
+        <script>
+            window.onload = function() {
+                let errorMessage = document.getElementById("error").value;
+                if(errorMessage) {
+                    alert(errorMessage);
+                }
+            };
+        </script>
 
     </form>
 </div>

@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class PostController {
@@ -25,11 +26,18 @@ public class PostController {
     public String postCreate() {
         return "post/post-create";
     }
-    @PostMapping("post/create")
-    public String postSave(PostCreateReqDto postCreateReqDto){
-        postService.save(postCreateReqDto);
-        return "redirect:/post/list";
+
+    @PostMapping("/post/create")
+    public String createPost(PostCreateReqDto postCreateReqDto, RedirectAttributes redirectAttributes) {
+        try {
+            postService.save(postCreateReqDto);
+            return "redirect:/post/list";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/post/create"; // 예외 발생 시 포스트 생성 페이지로 리디렉션
+        }
     }
+
 
     @GetMapping("post/list")
     public String postList(Model model, @PageableDefault(size = 5, sort = "createdTime",direction= Sort.Direction.DESC) Pageable pageable) {
