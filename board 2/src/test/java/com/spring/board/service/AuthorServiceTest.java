@@ -33,7 +33,7 @@ public class AuthorServiceTest {
         List<Post> posts = new ArrayList<>();
         Post post = Post.builder()
                 .title("hello")
-                .content("hello word")
+                .contents("hello word")
                 .build();
         posts.add(post);
         Author author = Author.builder()

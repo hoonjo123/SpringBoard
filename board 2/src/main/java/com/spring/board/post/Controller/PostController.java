@@ -4,6 +4,9 @@ import com.spring.board.post.dto.PostCreateReqDto;
 import com.spring.board.post.dto.PostUpdateReqDto;
 import com.spring.board.post.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,11 +32,19 @@ public class PostController {
     }
 
     @GetMapping("post/list")
-    public String postList(Model model) {
-        model.addAttribute("postList", postService.findAll());
+    public String postList(Model model, @PageableDefault(size = 5, sort = "createdTime",direction= Sort.Direction.DESC) Pageable pageable) {
+        model.addAttribute("postList",postService.findByAppointment(pageable));
         return "post/post-list";
 //        return postService.findAll();
     }
+
+//    @GetMapping("/json/post/list")
+//    //localhost:8080/post/list?size=xx&page=xx&sort=xx, desc)
+//    @ResponseBody
+//    public Page<PostListResDto> postList(Pageable pageable) {
+//        Page<PostListResDto> postListResDtos = postService.findAllJson(pageable);
+//        return postListResDtos;
+//    }
 
     @GetMapping("post/detail/{id}")
     public String postDetail(@PathVariable Long id, Model model) {
@@ -54,4 +65,5 @@ public class PostController {
         postService.delete(id);
         return "redirect:/post/list";
     }
+
 }

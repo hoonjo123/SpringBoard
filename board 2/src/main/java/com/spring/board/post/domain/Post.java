@@ -1,10 +1,7 @@
 package com.spring.board.post.domain;
 
 import com.spring.board.author.domain.Author;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -14,6 +11,8 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 
 public class Post {
     @Id
@@ -24,6 +23,10 @@ public class Post {
     private String title;
     @Column(nullable = false, length = 3000)
     private String contents;
+
+
+    private String appointment;
+    private LocalDateTime appointmentTime;
 
 
     @CreationTimestamp
@@ -39,21 +42,16 @@ public class Post {
     @JoinColumn(name = "author_id")
     private Author author;
 
-//    public Post(String title, String contents){
+
+    //    public Post(String title, String contents){
 //        this.title = title;
 //        this.contents = contents;
 //    }
-    public void updatePost(String title, String contents){
+    public void updatePost(String title, String contents) {
         this.title = title;
         this.contents = contents;
     }
-
-
-    @Builder
-    public Post(String title, String content, Author author) {
-        this.title = title;
-        this.contents = content;
-        this.author = author;
+    public void updateAppointment(String appointment) {
+        this.appointment = appointment;
     }
-
 }
