@@ -30,7 +30,7 @@ public class Author {
     @Column(length = 300)
     private String address;
 
-    @Column(nullable = false, length = 20, unique = true)
+    @Column(nullable = false, length = 40, unique = true)
     private String email;
 
     @Column(nullable = false)

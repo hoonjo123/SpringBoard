@@ -32,8 +32,12 @@ public class PostService {
         this.authorRepository = authorRepository;
     }
 
-    public void save(PostCreateReqDto postCreateReqDto) throws IllegalArgumentException{
-        Author author = authorRepository.findByEmail(postCreateReqDto.getEmail()).orElse(null);
+    public void save(PostCreateReqDto postCreateReqDto, String email) throws IllegalArgumentException{
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = authentication.getName();
+
+
+        Author author = authorRepository.findByEmail(email).orElse(null);
         LocalDateTime localDateTime = null;
         String appointment = null;
         if (postCreateReqDto.getAppointment().equals("Y") &&  //YES인 경우에만 DB에 Y, NO이면 null 세팅
@@ -137,20 +141,20 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public void createPostWithAuthor(String authorEmail, PostCreateReqDto postCreateReqDto) {
-        // Author 객체를 이메일을 통해 찾기
-        Author author = authorRepository.findByEmail(postCreateReqDto.getEmail())
-                .orElseThrow(() -> new RuntimeException("Author not found"));
-
-        // Post 객체 빌드
-        Post post = Post.builder()
-                .title(postCreateReqDto.getTitle())
-                .contents(postCreateReqDto.getContents())
-                .author(author) // Author 객체 설정
-                .build();
-
-        // Post 객체 저장
-        postRepository.save(post);
-    }
+//    public void createPostWithAuthor(String authorEmail, PostCreateReqDto postCreateReqDto) {
+//        // Author 객체를 이메일을 통해 찾기
+//        Author author = authorRepository.findByEmail(postCreateReqDto.getEmail())
+//                .orElseThrow(() -> new RuntimeException("Author not found"));
+//
+//        // Post 객체 빌드
+//        Post post = Post.builder()
+//                .title(postCreateReqDto.getTitle())
+//                .contents(postCreateReqDto.getContents())
+//                .author(author) // Author 객체 설정
+//                .build();
+//
+//        // Post 객체 저장
+//        postRepository.save(post);
+//    }
 
 }

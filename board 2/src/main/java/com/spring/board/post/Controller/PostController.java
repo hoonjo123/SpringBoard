@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpSession;
+
 @Controller
 public class PostController {
     private final PostService postService;
@@ -28,9 +30,11 @@ public class PostController {
     }
 
     @PostMapping("/post/create")
-    public String createPost(PostCreateReqDto postCreateReqDto, RedirectAttributes redirectAttributes) {
+    public String createPost(PostCreateReqDto postCreateReqDto, RedirectAttributes redirectAttributes, HttpSession httpSession) {
         try {
-            postService.save(postCreateReqDto);
+            //httpServletRequest req 를 매개변수에 주입한뒤에
+//            HttpSession session = req.getSession(); 세션값을 꺼내어 getAtrribute("email")
+            postService.save(postCreateReqDto, httpSession.getAttribute("email").toString());
             return "redirect:/post/list";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());

@@ -1,4 +1,9 @@
 spring:
+  #  임시계정/임시비밀번호
+  security:
+    user:
+      name: user
+      password: PasswordEncoder.encode(password)
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://localhost:3306/board
@@ -11,9 +16,6 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
 
   logging:
     #    로그파일 경로와 파일명 지정
